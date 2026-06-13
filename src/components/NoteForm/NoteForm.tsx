@@ -1,18 +1,18 @@
 import css from "./NoteForm.module.css";
 import type { Note, CreateNote } from "../../types/note";
 import { createNote } from "../../services/noteService";
-import { Formik, Form, Field, ErrorMessage, type FormikHelpers } from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface NoteFormProps {
-  onSuccess: (note: Note) => void;
+  onSuccess: () => void;
   onClose: () => void;
 }
 
 const validationSchema = Yup.object({
   title: Yup.string().min(3).max(50).required("Title is required"),
-  content: Yup.string().min(5).max(1000).required("Content is required"),
+  content: Yup.string().min(5).max(500),
   tag: Yup.mixed<Note["tag"]>()
     .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
     .required("Tag is required"),
@@ -23,9 +23,9 @@ export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
 
   const mutation = useMutation({
     mutationFn: createNote,
-    onSuccess: (newNote: Note) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
-      onSuccess(newNote);
+      onSuccess();
     },
     onError: (error) => {
       console.error(error);
@@ -38,14 +38,9 @@ export default function NoteForm({ onSuccess, onClose }: NoteFormProps) {
       validationSchema={validationSchema}
       onSubmit={(
         values: CreateNote,
-        formikHelpers: FormikHelpers<CreateNote>,
+        // formikHelpers: FormikHelpers<CreateNote>,
       ) => {
-        mutation.mutate(values, {
-          onSuccess: () => {
-            formikHelpers.resetForm();
-            onClose();
-          },
-        });
+        mutation.mutate(values);
       }}
     >
       {() => (
