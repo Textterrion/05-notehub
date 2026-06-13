@@ -12,7 +12,7 @@ interface NoteFormProps {
 
 const validationSchema = Yup.object({
   title: Yup.string().min(3).max(50).required("Title is required"),
-  content: Yup.string().min(5).max(500),
+  content: Yup.string().max(500),
   tag: Yup.mixed<Note["tag"]>()
     .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"])
     .required("Tag is required"),
